@@ -2,11 +2,12 @@ const http = require('http')
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const morgan = require('morgan')
+const logger = require('./utils/logger')
 const config = require('./utils/config')
+const middleware = require('./utils/middleware')
 const mongoose = require('mongoose')
 
-morgan.token('data', (req) =>  JSON.stringify(req.body))
+
 
 mongoose.set('useFindAndModify', false)
 
@@ -40,7 +41,7 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology
 
 app.use(cors())
 app.use(express.json())
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
+app.use(middleware.morganLogger(':method :url :status :res[content-length] - :response-time ms :data'))
 
 app.get('/api/blogs', (request, response) => {
   Blog
@@ -61,20 +62,9 @@ app.post('/api/blogs', (request, response, next) => {
     .catch(error => next(error))
 })
 
-const errorHandler = (error, req, res, next) => {
-    if (error.name === 'ValidationError') {
-        return res.status(400).json({error: error.message})
-    }
-    next(error)
-}
-
-const unknownRoute = (req, res) => {
-    res.status(404).send('No Resource, Endpoint Unknown')
-}
-
-app.use(unknownRoute)
-app.use(errorHandler)
+app.use(middleware.unknownRoute)
+app.use(middleware.errorHandler)
 
 app.listen(config.PORT, () => {
-  console.log(`Server running on port ${config.PORT}`)
+  logger.info(`Server running on port ${config.PORT}`)
 })
