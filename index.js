@@ -1,9 +1,9 @@
 const http = require('http')
-require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
 const morgan = require('morgan')
+const config = require('./utils/config')
 const mongoose = require('mongoose')
 
 morgan.token('data', (req) =>  JSON.stringify(req.body))
@@ -36,9 +36,7 @@ blogSchema.set('toJSON', {
 
 const Blog = mongoose.model('Blog', blogSchema)
 
-const mongoUrl = process.env.MONGODB_URI
-
-mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 
 app.use(cors())
 app.use(express.json())
@@ -77,7 +75,6 @@ const unknownRoute = (req, res) => {
 app.use(unknownRoute)
 app.use(errorHandler)
 
-const PORT = process.env.PORT
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+app.listen(config.PORT, () => {
+  console.log(`Server running on port ${config.PORT}`)
 })
