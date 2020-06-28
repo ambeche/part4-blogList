@@ -23,7 +23,7 @@ describe('total likes', () => {
       title: 'Async/await without try/catch in JavaScript ',
       author: 'Dzmitry Bayarchyk',
       url: 'https://itnext.io/async-await-without-try-catch-in-javascript-6dcdf705f8b1',
-      likes: 12,
+      likes: 17,
       __v: 0
     },
     {
@@ -65,6 +65,6 @@ describe('total likes', () => {
 
   test('for a larger list equals the sum of the likes of all the blogs', () => {
     const result = listHelper.totalLikes(listWithMoreBlogs)
-    expect(result).toBe(49)
+    expect(result).toBe(54)
   })
 })
