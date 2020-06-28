@@ -1,4 +1,5 @@
 const logger = require('../utils/logger')
+const _ = require('lodash')
 
 const dummy = (blogs) => 1
 
@@ -22,23 +23,20 @@ const favouriteBlog = (blogs) => {
 const mostBlogs = (blogs) => {
   if (blogs.length === 0 ) return 'List is empty!'
 
-  const authors = blogs.map(b => b.author)
-  let counter = {}
-  let mostBlogger = {}
-  let current = 0
-  for (let i = 0; i < blogs.length; i++) {
-    let author = authors[i]
-    counter[author] === undefined ? counter[author] = 1 : counter[author] += 1
-    if (counter[author] > current) {
-      current = counter[author]
-      mostBlogger.author = authors[i]
-      mostBlogger.blogs = counter[authors[i]]
-    }
-  }
+  const mostBlogger = _
+    .chain( blogs.concat())
+    .sortBy('author')
+    .countBy('author')
+    .toPairs()
+    .maxBy(_.last)
+    .value()
 
   logger.info(mostBlogger)
 
-  return mostBlogger
+  return {
+    author: mostBlogger[0],
+    blogs: mostBlogger[1]
+  }
 }
 
 module.exports = {
