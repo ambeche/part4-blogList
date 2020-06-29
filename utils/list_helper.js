@@ -6,9 +6,8 @@ const dummy = (blogs) => 1
 const totalLikes = (blogs) => blogs.reduce((acc, b) => acc + b.likes, 0)
 
 const favouriteBlog = (blogs) => {
-  if (blogs.length === 0) {
-    return 'Empty blog list!'
-  }
+  if (blogs.length === 0) return 'Empty blog list!'
+
   const mostLiked = blogs.map((b) => b.likes).reduce((a, b) => Math.max(a, b))
   const favourite = blogs.find((b) => b.likes === mostLiked)
   logger.info(favourite)
@@ -39,9 +38,24 @@ const mostBlogs = (blogs) => {
   }
 }
 
+const mostLikes = (blogs) => {
+  const mostLiked = favouriteBlog(blogs)
+  if ( typeof mostLiked === 'string') return mostLiked
+
+  const authorBlogs = blogs.filter(b => b.author === mostLiked.author)
+  const likesForAuthor = totalLikes(authorBlogs)
+  logger.info(`Author: ${mostLiked.author}, Likes: ${likesForAuthor}`)
+
+  return {
+    author:mostLiked.author,
+    likes: likesForAuthor
+  }
+}
+
 module.exports = {
   dummy,
   totalLikes,
   favouriteBlog,
   mostBlogs,
+  mostLikes,
 }
