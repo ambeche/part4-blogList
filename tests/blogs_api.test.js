@@ -26,4 +26,16 @@ describe('Tests for fetching blogs from DB', () => {
   })
 })
 
+describe('toJSON transforms _id to id', () => {
+  test('unique identifier property is named id not _id', async () => {
+    const blogs = await testHelper.blogsFromDb()
+    blogs.forEach(blog => expect(blog.id).toBeDefined())
+  })
+
+  test('identifier _id is undefined', async () => {
+    const blogs = await testHelper.blogsFromDb()
+    blogs.forEach(blog => expect(blog._id).not.toBeDefined())
+  })
+})
+
 afterAll( async () => await Mongoose.connection.close())
