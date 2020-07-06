@@ -10,7 +10,6 @@ const favouriteBlog = (blogs) => {
 
   const mostLiked = blogs.map((b) => b.likes).reduce((a, b) => Math.max(a, b))
   const favourite = blogs.find((b) => b.likes === mostLiked)
-  logger.info(favourite)
 
   return {
     title: favourite.title,
@@ -44,7 +43,6 @@ const mostLikes = (blogs) => {
 
   const authorBlogs = blogs.filter(b => b.author === mostLiked.author)
   const likesForAuthor = totalLikes(authorBlogs)
-  logger.info(`Author: ${mostLiked.author}, Likes: ${likesForAuthor}`)
 
   return {
     author:mostLiked.author,
