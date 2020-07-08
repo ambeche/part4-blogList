@@ -57,6 +57,25 @@ describe('Persisting blogs to DB', () => {
     expect(fromDb).toHaveLength(testHelper.initialBlogs.length + 1)
     expect(fromDb).toContainEqual(newBlog)
   })
+
+  test('likes property defaults to a value zero if likes is undefined for the blog', async () => {
+    const blogWithoutLikes = {
+      title: 'Stop Using If-Else Statements',
+      author: 'Nicklas Millard',
+      url: 'https://medium.com/swlh/stop-using-if-else-statements-f4d2323e6e4',
+    }
+    await api
+      .post('/api/blogs')
+      .send(blogWithoutLikes)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const fromDb = await testHelper.blogsFromDb()
+    const likesSetToZero = fromDb.find(b => b.title === blogWithoutLikes.title && b.author === blogWithoutLikes.author)
+
+    expect(fromDb).toHaveLength(testHelper.initialBlogs.length + 1)
+    expect(likesSetToZero.likes).toBe(0)
+  })
 })
 
 afterAll( async () => await Mongoose.connection.close())
