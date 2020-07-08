@@ -76,6 +76,22 @@ describe('Persisting blogs to DB', () => {
     expect(fromDb).toHaveLength(testHelper.initialBlogs.length + 1)
     expect(likesSetToZero.likes).toBe(0)
   })
+
+  test('blog without title or url is not persisted, fails with status code 400', async () => {
+    const invalidBlog = {
+      author: 'Dzmitry Bayarchyk',
+      likes: 10,
+    }
+    await api
+      .post('/api/blogs')
+      .send(invalidBlog)
+      .expect(400)
+
+    const fromDb = await testHelper.blogsFromDb()
+
+    expect(fromDb).toHaveLength(testHelper.initialBlogs.length)
+  })
+
 })
 
 afterAll( async () => await Mongoose.connection.close())
