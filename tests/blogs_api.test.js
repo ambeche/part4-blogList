@@ -38,4 +38,25 @@ describe('toJSON transforms _id to id', () => {
   })
 })
 
+describe('Persisting blogs to DB', () => {
+  test('A valid blog is added to DB', async () => {
+    const newBlog = {
+      title: 'Async/await without try/catch in JavaScript ',
+      author: 'Dzmitry Bayarchyk',
+      url: 'https://itnext.io/async-await-without-try-catch-in-javascript-6dcdf705f8b1',
+      likes: 10,
+    }
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const fromDb = await testHelper.blogsFromDb()
+    fromDb.forEach(b => delete b.id)
+    expect(fromDb).toHaveLength(testHelper.initialBlogs.length + 1)
+    expect(fromDb).toContainEqual(newBlog)
+  })
+})
+
 afterAll( async () => await Mongoose.connection.close())
