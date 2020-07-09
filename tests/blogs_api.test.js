@@ -91,7 +91,20 @@ describe('Persisting blogs to DB', () => {
 
     expect(fromDb).toHaveLength(testHelper.initialBlogs.length)
   })
+})
 
+describe('blog deletion', () => {
+  test('deleting a blog by id, status code 204 implies success', async () => {
+    const initialState = await testHelper.blogsFromDb()
+    const toBeDeleted = initialState[0]
+    await api
+      .delete(`/api/blogs/${toBeDeleted.id}`)
+      .expect(204)
+
+    const currentState = await testHelper.blogsFromDb()
+    expect(currentState).toHaveLength(testHelper.initialBlogs.length - 1)
+    expect(currentState).not.toContainEqual(toBeDeleted)
+  })
 })
 
 afterAll( async () => await Mongoose.connection.close())
