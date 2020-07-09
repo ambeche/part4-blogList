@@ -107,4 +107,35 @@ describe('blog deletion', () => {
   })
 })
 
+describe('updating a specific blog', () => {
+  test('updating a blog with valid id', async () => {
+    const initialState = await testHelper.blogsFromDb()
+    const toBeUpdated = initialState[1]
+    const newLikes = { likes: 40 }
+    await api
+      .put(`/api/blogs/${toBeUpdated.id}`)
+      .send(newLikes)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const fromDb = await testHelper.blogsFromDb()
+    const updatedBlog = fromDb.find(b => b.id === toBeUpdated.id)
+
+    expect(fromDb).toHaveLength(testHelper.initialBlogs.length)
+    expect(updatedBlog.likes).toBe(newLikes.likes)
+  })
+
+  test('update fails with code 400 for invalid id type', async () => {
+    const initialState = await testHelper.blogsFromDb()
+    const newLikes = { likes: 20 }
+    await api
+      .put('/api/blogs/invalidIdType')
+      .send(newLikes)
+      .expect(400)
+
+    const currentState = await testHelper.blogsFromDb()
+    expect(currentState).toEqual(initialState)
+  })
+})
+
 afterAll( async () => await Mongoose.connection.close())
