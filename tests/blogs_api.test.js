@@ -2,6 +2,7 @@ const supertest = require('supertest')
 const app = require('../app')
 const testHelper = require('./test_helper')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const Mongoose = require('mongoose')
 
 const api = supertest(app)
@@ -101,9 +102,9 @@ describe('blog deletion', () => {
       .delete(`/api/blogs/${toBeDeleted.id}`)
       .expect(204)
 
-    const currentState = await testHelper.blogsFromDb()
-    expect(currentState).toHaveLength(testHelper.initialBlogs.length - 1)
-    expect(currentState).not.toContainEqual(toBeDeleted)
+    const finalState = await testHelper.blogsFromDb()
+    expect(finalState).toHaveLength(testHelper.initialBlogs.length - 1)
+    expect(finalState).not.toContainEqual(toBeDeleted)
   })
 })
 
@@ -133,8 +134,37 @@ describe('updating a specific blog', () => {
       .send(newLikes)
       .expect(400)
 
-    const currentState = await testHelper.blogsFromDb()
-    expect(currentState).toEqual(initialState)
+    const finalState = await testHelper.blogsFromDb()
+    expect(finalState).toEqual(initialState)
+  })
+
+  describe('tests for user api', () => {
+    beforeEach(async () => {
+      await User.deleteMany({})
+      const user = new User({ username: 'admin', name: 'admin', password: 'tests' })
+      await user.save()
+    })
+
+    test('A valid user is added to DB, status code equals 200', async () => {
+      const initialState = await testHelper.usersFromDb()
+      const newUser = {
+        username: 'brainyarck',
+        name: 'Heribert Ambe',
+        password: 'test1'
+      }
+
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+      const finalState = await testHelper.usersFromDb()
+      const usernames = finalState.map(u => u.username)
+
+      expect(finalState).toHaveLength(initialState.length + 1)
+      expect(usernames).toContain(newUser.username)
+    })
   })
 })
 
