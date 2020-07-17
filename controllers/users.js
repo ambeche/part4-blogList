@@ -9,9 +9,12 @@ usersRouter.get('/', async (req, res) => {
 
 usersRouter.post('/', async (req, res) => {
   const { username, name, password } = req.body
-  console.log(username,name)
-  const passwordHash = await bcrypt.hash(password, 10)
 
+  if (!(password && password.length > 2)) {
+    return res.status(400).send({ error: 'missing or invalid password; min password length is 3' })
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10)
   const newUser = new User ({
     username,
     name,

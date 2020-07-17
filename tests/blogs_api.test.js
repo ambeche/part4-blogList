@@ -137,34 +137,94 @@ describe('updating a specific blog', () => {
     const finalState = await testHelper.blogsFromDb()
     expect(finalState).toEqual(initialState)
   })
+})
 
-  describe('tests for user api', () => {
-    beforeEach(async () => {
-      await User.deleteMany({})
-      const user = new User({ username: 'admin', name: 'admin', password: 'tests' })
-      await user.save()
-    })
+/*  Testing user api */
 
-    test('A valid user is added to DB, status code equals 200', async () => {
-      const initialState = await testHelper.usersFromDb()
-      const newUser = {
-        username: 'brainyarck',
-        name: 'Heribert Ambe',
-        password: 'test1'
-      }
+describe('tests for user api', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+    const user = new User({ username: 'admin', name: 'admin', password: 'tests' })
+    await user.save()
+  })
 
-      await api
-        .post('/api/users')
-        .send(newUser)
-        .expect(201)
-        .expect('Content-Type', /application\/json/)
+  test('A valid user is added to DB, status code equals 200', async () => {
+    const initialState = await testHelper.usersFromDb()
+    const newUser = {
+      username: 'brainyarck',
+      name: 'Heribert Ambe',
+      password: 'test1'
+    }
 
-      const finalState = await testHelper.usersFromDb()
-      const usernames = finalState.map(u => u.username)
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
 
-      expect(finalState).toHaveLength(initialState.length + 1)
-      expect(usernames).toContain(newUser.username)
-    })
+    const finalState = await testHelper.usersFromDb()
+    const usernames = finalState.map(u => u.username)
+
+    expect(finalState).toHaveLength(initialState.length + 1)
+    expect(usernames).toContain(newUser.username)
+  })
+  test('Password required; request fails with status code 400', async () => {
+    const initialState = await testHelper.usersFromDb()
+    const invalidUser = {
+      name: 'Emanga',
+      username: 'ema'
+    }
+
+    const res = await api
+      .post('/api/users')
+      .send(invalidUser)
+      .expect(400)
+
+    const finalState = await testHelper.usersFromDb()
+    const names = finalState.map(u => u.username)
+
+    expect(res.body.error).toContain('missing or invalid password; min password length is 3')
+    expect(finalState).toHaveLength(initialState.length)
+    expect(names).not.toContain(invalidUser.name)
+  })
+
+  test('username must be a min of 3 characters long; request fails with status code 400', async () => {
+    const initialState = await testHelper.usersFromDb()
+    const invalidUser = {
+      password: 'test4',
+      username: 'em'
+    }
+
+    const res = await api
+      .post('/api/users')
+      .send(invalidUser)
+      .expect(400)
+
+    const finalState = await testHelper.usersFromDb()
+
+    expect(res.body.error).toContain(`\`username\` (\`${invalidUser.username}\`) is shorter than the minimum allowed length`)
+    expect(finalState).toHaveLength(initialState.length)
+  })
+
+  test('Username must be unique, else operation fails with status code 400', async () => {
+    const initialState = await testHelper.usersFromDb()
+    const notUnique = {
+      name: 'Emanga',
+      username: 'admin',
+      password: 'test3'
+    }
+
+    const res = await api
+      .post('/api/users')
+      .send(notUnique)
+      .expect(400)
+
+    const finalState = await testHelper.usersFromDb()
+    const names = finalState.map(u => u.username)
+
+    expect(res.body.error).toContain('`username` to be unique')
+    expect(finalState).toHaveLength(initialState.length)
+    expect(names).not.toContain(notUnique.name)
   })
 })
 
