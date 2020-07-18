@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken')
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
@@ -12,7 +13,7 @@ blogsRouter.post('/', async (req, res) => {
   if (blog.likes === undefined) blog.likes = 0
 
   const users = await User.find({})
-  const user = users ? users[3] : null
+  const user = users ? users[0] : null
 
   user? blog.user = user._id : res.status(400).send('missing id')
   const newblog = new Blog(blog)
