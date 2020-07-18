@@ -19,4 +19,13 @@ const unknownRoute = (req, res) => {
   res.status(404).send('No Resource, Endpoint Unknown')
 }
 
-module.exports = { morganLogger, errorHandler, unknownRoute }
+const tokenExtractor = (req, res, next) => {
+  const authorization = req.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    req.token = authorization.substring(7)
+  }
+
+  next()
+}
+
+module.exports = { morganLogger, errorHandler, unknownRoute, tokenExtractor }

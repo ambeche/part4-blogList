@@ -19,6 +19,7 @@ app.use(cors())
 app.use(express.json())
 app.use(middleware.morganLogger(':method :url :status :res[content-length] - :response-time ms :data'))
 
+app.use(middleware.tokenExtractor)
 app.use('/api/login', loginRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/blogs', blogsRouter)
