@@ -11,7 +11,7 @@ const loginRouter = require('./controllers/login')
 const blogsRouter = require('./controllers/blogs')
 
 mongoose
-  .connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
   .then( () => logger.info('connected to', config.MONGODB_URI))
   .catch( err => logger.err(err.message))
 
