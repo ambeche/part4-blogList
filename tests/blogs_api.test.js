@@ -1,17 +1,26 @@
+const bcrypt = require('bcrypt')
 const supertest = require('supertest')
 const app = require('../app')
 const testHelper = require('./test_helper')
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const Mongoose = require('mongoose')
-
 const api = supertest(app)
 
+let token
 beforeEach( async () => {
   await Blog.deleteMany({})
 
   const blogs = testHelper.initialBlogs.map(b => new Blog (b))
   await Promise.all(blogs.map(b => b.save()))
+
+  // initialize database and login admin user
+  await User.deleteMany({})
+  const passwordHash = await bcrypt.hash('tests', 10)
+  const user = new User({ username: 'admin', name: 'admin', passwordHash })
+  await user.save()
+  const res = await api.post('/api/login').send({ username: 'admin', name: 'admin', password: 'tests' })
+  token = res.body.token
 })
 
 describe('Tests for fetching blogs from DB', () => {
@@ -40,23 +49,45 @@ describe('toJSON transforms _id to id', () => {
 })
 
 describe('Persisting blogs to DB', () => {
-  test('A valid blog is added to DB', async () => {
+  test('A valid blog is added to DB by an authenticated user, succeeds with status code 201', async () => {
     const newBlog = {
       title: 'Async/await without try/catch in JavaScript ',
       author: 'Dzmitry Bayarchyk',
       url: 'https://itnext.io/async-await-without-try-catch-in-javascript-6dcdf705f8b1',
       likes: 10,
     }
+
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
     const fromDb = await testHelper.blogsFromDb()
-    fromDb.forEach(b => delete b.id)
+    const titlesFromDb = fromDb.map(b =>  b.title)
     expect(fromDb).toHaveLength(testHelper.initialBlogs.length + 1)
-    expect(fromDb).toContainEqual(newBlog)
+    expect(titlesFromDb).toContain(newBlog.title)
+  })
+
+  test('A valid blog cannot be added by an Unauthorized user, fails with status code 401', async () => {
+    const newBlog = {
+      title: 'Async/await without try/catch in JavaScript ',
+      author: 'Dzmitry Bayarchyk',
+      url: 'https://itnext.io/async-await-without-try-catch-in-javascript-6dcdf705f8b1',
+      likes: 10,
+    }
+
+    const res = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+
+    const fromDb = await testHelper.blogsFromDb()
+    const titlesFromDb = fromDb.map(b =>  b.title)
+    expect(res.body.error).toContain('missing or invalid token')
+    expect(fromDb).toHaveLength(testHelper.initialBlogs.length)
+    expect(titlesFromDb).not.toContain(newBlog.title)
   })
 
   test('likes property defaults to a value zero if likes is undefined for the blog', async () => {
@@ -67,6 +98,7 @@ describe('Persisting blogs to DB', () => {
     }
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(blogWithoutLikes)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -85,6 +117,7 @@ describe('Persisting blogs to DB', () => {
     }
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(invalidBlog)
       .expect(400)
 
@@ -95,16 +128,42 @@ describe('Persisting blogs to DB', () => {
 })
 
 describe('blog deletion', () => {
-  test('deleting a blog by id, status code 204 implies success', async () => {
-    const initialState = await testHelper.blogsFromDb()
-    const toBeDeleted = initialState[0]
+  test('blog deletion by authorized user succeeds with status code 204', async () => {
+    const newblog = {
+      title: 'Stop Using If-Else Statements',
+      author: 'Nicklas Millard',
+      url: 'https://medium.com/swlh/stop-using-if-else-statements-f4d2323e6e4',
+      likes: 20,
+    }
+    const createdByAdmin = await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newblog)
+      .expect(201)
+
+    const toBeDeletedByAdmin = createdByAdmin.body
+    const currentState = await testHelper.blogsFromDb()
+
     await api
-      .delete(`/api/blogs/${toBeDeleted.id}`)
+      .delete(`/api/blogs/${toBeDeletedByAdmin.id}`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(204)
 
     const finalState = await testHelper.blogsFromDb()
-    expect(finalState).toHaveLength(testHelper.initialBlogs.length - 1)
-    expect(finalState).not.toContainEqual(toBeDeleted)
+    expect(finalState).toHaveLength(currentState.length - 1)
+  })
+
+  test('blog deletion by an Unauthorized user fails with status code 401', async () => {
+
+    const initialState = await testHelper.blogsFromDb()
+    const toBeDeletedByUnauthorizedUser = initialState[0]
+
+    await api
+      .delete(`/api/blogs/${toBeDeletedByUnauthorizedUser.id}`)
+      .expect(401)
+
+    const finalState = await testHelper.blogsFromDb()
+    expect(finalState).toHaveLength( initialState.length)
   })
 })
 
@@ -142,11 +201,6 @@ describe('updating a specific blog', () => {
 /*  Testing user api */
 
 describe('tests for user api', () => {
-  beforeEach(async () => {
-    await User.deleteMany({})
-    const user = new User({ username: 'admin', name: 'admin', password: 'tests' })
-    await user.save()
-  })
 
   test('A valid user is added to DB, status code equals 200', async () => {
     const initialState = await testHelper.usersFromDb()
