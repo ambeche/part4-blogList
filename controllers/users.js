@@ -7,6 +7,11 @@ usersRouter.get('/', async (req, res) => {
   res.json(users.map(u => u.toJSON()))
 })
 
+usersRouter.get('/:id', async (req, res) => {
+  const user = await User.findById(req.params.id)
+  res.json(user.toJSON())
+})
+
 usersRouter.post('/', async (req, res) => {
   const { username, name, password } = req.body
 
