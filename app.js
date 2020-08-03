@@ -21,10 +21,9 @@ app.use(express.json())
 app.use(middleware.morganLogger(':method :url :status :res[content-length] - :response-time ms :data'))
 
 app.use(middleware.tokenExtractor)
-app.use('/api/blogs', blogsRouter)
 app.use('/api/login', loginRouter)
+app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
-
 
 if (process.env.NODE_ENV === 'test') {
   const testingRouter = require('./controllers/testing')
