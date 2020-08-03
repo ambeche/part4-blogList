@@ -16,7 +16,7 @@ mongoose
   .catch( err => logger.err(err.message))
 
 app.use(cors())
-//app.use(express.static('build'))
+app.use(express.static('build'))
 app.use(express.json())
 app.use(middleware.morganLogger(':method :url :status :res[content-length] - :response-time ms :data'))
 
