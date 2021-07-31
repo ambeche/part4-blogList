@@ -1,4 +1,4 @@
-const listHelper = require('../utils/list_helper')
+const listHelper = require('../utils/list_helper');
 
 describe('favourite blog', () => {
   const blogs = [
@@ -81,20 +81,20 @@ describe('favourite blog', () => {
       url: 'https://medium.com/@olxc/type-classes-explained-a9767f64ed2c',
       likes: 55,
       __v: 0
-    },
-  ]
+    }
+  ];
 
   test('blog with most likes', () => {
-    const result = listHelper.favouriteBlog(blogs)
+    const result = listHelper.favouriteBlog(blogs);
     expect(result).toEqual({
       title: 'Improve your GraphQL schema with Relay Specification',
       author: 'Dzmitry Bayarchyk',
       likes: 55
-    })
-  })
+    });
+  });
 
   test('no favourite blog for an empty list', () => {
-    const result = listHelper.favouriteBlog([])
-    expect(result).toBe('Empty blog list!')
-  })
-})
+    const result = listHelper.favouriteBlog([]);
+    expect(result).toBe('Empty blog list!');
+  });
+});

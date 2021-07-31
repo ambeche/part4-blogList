@@ -1,9 +1,9 @@
 const info = (...params) => {
-  console.log(...params)
-}
+  console.log(...params);
+};
 
 const err = (...params) => {
-  console.error(...params)
-}
+  console.error(...params);
+};
 
-module.exports = { info, err }
+module.exports = { info, err };

@@ -1,4 +1,4 @@
-const listHelper = require('../utils/list_helper')
+const listHelper = require('../utils/list_helper');
 
 describe('most likes', () => {
   const blogs = [
@@ -81,19 +81,19 @@ describe('most likes', () => {
       url: 'https://medium.com/@olxc/type-classes-explained-a9767f64ed2c',
       likes: 55,
       __v: 0
-    },
-  ]
+    }
+  ];
 
   test('author with highest likes', () => {
-    const result = listHelper.mostLikes(blogs)
+    const result = listHelper.mostLikes(blogs);
     expect(result).toEqual({
       author: 'Dzmitry Bayarchyk',
       likes: 65
-    })
-  })
+    });
+  });
 
   test('no highest likes for an empty list', () => {
-    const result = listHelper.mostLikes([])
-    expect(result).toBe('Empty blog list!')
-  })
-})
+    const result = listHelper.mostLikes([]);
+    expect(result).toBe('Empty blog list!');
+  });
+});

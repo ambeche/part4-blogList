@@ -1,4 +1,4 @@
-const listHelper = require('../utils/list_helper')
+const listHelper = require('../utils/list_helper');
 
 describe('total likes', () => {
   const listWithMoreBlogs = [
@@ -49,22 +49,22 @@ describe('total likes', () => {
       url: 'medium.com/@nadeesha/a-practical-guide-to-writing-more-functional-javascript-db49409f71',
       likes: 9,
       __v: 0
-    },
-  ]
-  const listWithOneBlog = [listWithMoreBlogs[0]]
+    }
+  ];
+  const listWithOneBlog = [listWithMoreBlogs[0]];
 
   test('is zero for empty list', () => {
-    const result = listHelper.totalLikes([])
-    expect(result).toBe(0)
-  })
+    const result = listHelper.totalLikes([]);
+    expect(result).toBe(0);
+  });
 
   test('when list has only one blog equals the likes of that blog', () => {
-    const result = listHelper.totalLikes(listWithOneBlog)
-    expect(result).toBe(5)
-  })
+    const result = listHelper.totalLikes(listWithOneBlog);
+    expect(result).toBe(5);
+  });
 
   test('for a larger list equals the sum of the likes of all the blogs', () => {
-    const result = listHelper.totalLikes(listWithMoreBlogs)
-    expect(result).toBe(54)
-  })
-})
+    const result = listHelper.totalLikes(listWithMoreBlogs);
+    expect(result).toBe(54);
+  });
+});
