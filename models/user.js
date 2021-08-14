@@ -23,7 +23,7 @@ const userSchema = mongoose.Schema({
   ],
   numberOfBlogs: {
     type: Number,
-    get: function () {
+    default: function () {
       return this.blogs.length;
     }
   }
