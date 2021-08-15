@@ -20,8 +20,8 @@ mongoose
   .catch((err) => logger.err(err.message));
 
 app.use(cors());
-app.use('/build', express.static('react-ui/build'));
-app.use('/bloglist-v2', express.static('react-ui/bloglist-v2'));
+app.use('react-ui/v1', express.static('react-ui/v1'));
+app.use('react-ui/v2', express.static('react-ui/v2'));
 app.use(express.json());
 app.use(
   middleware.morganLogger(
