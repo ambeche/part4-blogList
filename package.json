@@ -10,10 +10,10 @@
     "lint:f": "eslint --fix .",
     "test": "cross-env NODE_ENV=test jest --verbose --coverage --runInBand",
     "start:test": "cross-env NODE_ENV=test node index.js",
-    "build:ui": "rm -rf react-ui/v1 && cd ../../FullStack2020/part5/bloglist-frontend && npm run build --prod && cp -r build/ ../../../backend2020/part4-blogList/react-ui/v1",
-    "build:ui-v2": "rm -rf react-ui/v2 && cd ../../FullStack2020/part7/bloglist-part7-with-redux-navigation-styles && npm run build --prod && cp -r build/ ../../../backend2020/part4-blogList/react-ui/v2",
+    "build:ui": "rm -rf react-ui/v1 && cd ../../FullStack2020/part5/bloglist-frontend && npm run build --prod && cp -r build/ ../../../backend2020/part4-blogList/react-ui/app-1",
+    "build:ui-v2": "rm -rf react-ui/app-2-with-redux-styles && cd ../../FullStack2020/part7/bloglist-part7-with-redux-navigation-styles && npm run build --prod && cp -r build/ ../../../backend2020/part4-blogList/react-ui/app-2-with-redux-styles",
     "deploy": "git push heroku master",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy"
+    "deploy:full": "npm run build:ui && npm run build:ui-v2 && git add . && git commit -m uibuild && npm run deploy"
   },
   "author": "Tamanji Che",
   "license": "MIT",

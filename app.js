@@ -9,6 +9,7 @@ const mongoose = require('mongoose');
 const usersRouter = require('./controllers/users');
 const loginRouter = require('./controllers/login');
 const blogsRouter = require('./controllers/blogs');
+const path = require('path');
 
 mongoose
   .connect(config.MONGODB_URI, {
@@ -20,8 +21,8 @@ mongoose
   .catch((err) => logger.err(err.message));
 
 app.use(cors());
-app.use('react-ui/v1', express.static('react-ui/v1'));
-app.use('react-ui/v2', express.static('react-ui/v2'));
+app.use('/', express.static('react-ui/app-1'));
+app.use('/version-2', express.static('react-ui/app-2-with-redux-styles'));
 app.use(express.json());
 app.use(
   middleware.morganLogger(
