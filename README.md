@@ -1,6 +1,5 @@
 # part4-blogList Backend
 
-## Description 
 A server app that powers BlogLister, a blogging application. It provides REST APIs for posting, requesting and commenting on blogs.
 
 ## APIs
