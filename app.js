@@ -21,9 +21,10 @@ mongoose
   .catch((err) => logger.err(err.message));
 
 app.use(cors());
+app.use(express.json());
 app.use('/', express.static('react-ui/app-1'));
 app.use('/version-2', express.static('react-ui/app-2-with-redux-styles'));
-app.use(express.json());
+
 app.use(
   middleware.morganLogger(
     ':method :url :status :res[content-length] - :response-time ms :data'

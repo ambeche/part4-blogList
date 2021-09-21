@@ -31,8 +31,14 @@ blogsRouter.post('/', async (req, res) => {
   const savedBlog = await newblog.save();
   user.blogs = user.blogs.concat(savedBlog._id);
   await user.save();
+  console.log('savedblog', savedBlog);
 
-  res.status(201).json(savedBlog.toJSON());
+  const createdblogWithAssociatedIdsPopulated = await Blog.findById(
+    savedBlog._id
+  ).populate('user', { username: 1, name: 1 });
+  console.log('blog', createdblogWithAssociatedIdsPopulated);
+
+  res.status(201).json(createdblogWithAssociatedIdsPopulated.toJSON());
 });
 
 blogsRouter.put('/:id', async (req, res) => {
@@ -42,7 +48,9 @@ blogsRouter.put('/:id', async (req, res) => {
     {
       new: true
     }
-  );
+  )
+    .populate('user', { username: 1, name: 1 })
+    .populate('comments', { commentedBlog: 0 });
   res.json(updated.toJSON());
 });
 
@@ -62,10 +70,13 @@ blogsRouter.delete('/:id', async (req, res) => {
       .json({ error: 'Blog deletion is only authorized to the author!' });
 
   await Blog.findByIdAndRemove(req.params.id);
-  // deletes all comments associated with the given blog
-  await Promise.all(() =>
-    blog.comments.map((comment) => Comment.findByIdAndDelete(comment._id))
-  );
+
+  // deletes all comments associated with the deleted blog
+  if (blog.comments.length)
+    await Promise.all(() =>
+      blog.comments.map((comment) => Comment.findByIdAndDelete(comment._id))
+    );
+
   user.blogs = user.blogs.filter(
     (blogId) => blogId.toString() !== req.params.id.toString()
   );
