@@ -2,16 +2,19 @@ const mongoose = require('mongoose');
 
 mongoose.set('useFindAndModify', false);
 
-const commentSchema = mongoose.Schema({
-  content: {
-    type: String,
-    required: true
+const commentSchema = mongoose.Schema(
+  {
+    content: {
+      type: String,
+      required: true
+    },
+    commentedBlog: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Blog'
+    }
   },
-  commentedBlog: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Blog'
-  }
-});
+  { timestamps: true }
+);
 
 commentSchema.set('toJSON', {
   transform: (document, returnedObject) => {

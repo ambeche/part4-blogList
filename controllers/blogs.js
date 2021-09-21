@@ -4,8 +4,14 @@ const Blog = require('../models/blog');
 const Comment = require('../models/comment');
 const User = require('../models/user');
 
-const decodeToken = async (req) =>
-  await jwt.verify(req.token, process.env.ENCODING);
+const decodeAndVerifyToken = async (req, res) => {
+  const decodedToken = await jwt.verify(req.token, process.env.ENCODING);
+
+  if (!decodedToken.id)
+    return res.status(401).json({ error: 'token missing or invalid' });
+
+  return decodedToken;
+};
 
 blogsRouter.get('/', async (req, res) => {
   const blogs = await Blog.find({})
@@ -17,13 +23,10 @@ blogsRouter.get('/', async (req, res) => {
 blogsRouter.post('/', async (req, res) => {
   const blog = req.body;
 
-  const decodedToken = await decodeToken(req);
-  if (!decodedToken.id)
-    return res.status(401).json({ error: 'token missing or invalid' });
-
+  const decodedToken = await decodeAndVerifyToken(req, res);
   const user = await User.findById(decodedToken.id);
 
-  if (blog.likes === undefined) blog.likes = 0;
+  //if (blog.likes.value === undefined) blog.likes.value = 0;
 
   blog.user = user._id;
   const newblog = new Blog(blog);
@@ -31,6 +34,7 @@ blogsRouter.post('/', async (req, res) => {
   const savedBlog = await newblog.save();
   user.blogs = user.blogs.concat(savedBlog._id);
   await user.save();
+
   console.log('savedblog', savedBlog);
 
   const createdblogWithAssociatedIdsPopulated = await Blog.findById(
@@ -42,23 +46,51 @@ blogsRouter.post('/', async (req, res) => {
 });
 
 blogsRouter.put('/:id', async (req, res) => {
-  const updated = await Blog.findByIdAndUpdate(
-    req.params.id,
-    { likes: req.body.likes },
-    {
-      new: true
-    }
-  )
+  const decodedToken = await decodeAndVerifyToken(req, res);
+
+  const likedblog = await Blog.findById(req.params.id);
+
+  // verifies whether a blog has already been liked, hance like/unlike a blog
+  // the isLiked properter combined with the userId controlls whether a blog is liked or not
+  // no multiple likes
+
+  const possibleLiker = likedblog.likes.users.find(
+    (user) => user.liker?.toString() === decodedToken.id.toString()
+  );
+
+  const isEmpty = likedblog.likes.users.length === 0;
+
+  const setLiker = (isLiked) =>
+    likedblog.likes.users.map((user) =>
+      user.liker?.toString() === decodedToken.id?.toString()
+        ? { liker: decodedToken.id, isLiked }
+        : user
+    );
+
+  likedblog.likes = {
+    value:
+      possibleLiker && possibleLiker?.isLiked
+        ? likedblog.likes.value - 1
+        : req.body.likes.value,
+    users: possibleLiker?.isLiked
+      ? setLiker(false)
+      : isEmpty
+        ? [{ liker: decodedToken.id, isLiked: true }]
+        : setLiker(true)
+  };
+  await likedblog.save();
+
+  // responds with accociated fields populated
+  const updated = await Blog.findById(req.params.id)
     .populate('user', { username: 1, name: 1 })
     .populate('comments', { commentedBlog: 0 });
   res.json(updated.toJSON());
 });
 
 blogsRouter.delete('/:id', async (req, res) => {
-  const decodedToken = await decodeToken(req);
-  if (!decodedToken)
-    return res.status(401).json({ error: 'token missing or invalid' });
+  const decodedToken = await decodeAndVerifyToken(req, res);
 
+  // verifies that the authenticated user is authorized to delete the blog.
   const blog = await Blog.findById(req.params.id);
   const user = await User.findById(decodedToken.id);
   const isVerified =

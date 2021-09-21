@@ -1,37 +1,51 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-mongoose.set('useFindAndModify', false)
+mongoose.set('useFindAndModify', false);
+
+const likesSubSchema = mongoose.Schema({
+  liker: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  isLiked: {
+    type: Boolean,
+    default: 0
+  },
+  _id: { id: false }
+});
 
 const blogSchema = mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: true
   },
-  author:{
+  author: {
     type: String,
-    required: true,
+    required: true
   },
   url: {
     type: String,
-    required: true,
+    required: true
   },
-  likes: Number,
+  likes: {
+    value: { type: Number, default: 0 },
+    users: [likesSubSchema]
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
-  comments: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Comment'
-  }]
-})
+  comments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Comment'
+    }
+  ]
+});
 
 blogSchema.set('toJSON', {
   transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
   }
-})
+});
 
-module.exports = mongoose.model('Blog', blogSchema)
+module.exports = mongoose.model('Blog', blogSchema);
