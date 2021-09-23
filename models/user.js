@@ -22,10 +22,7 @@ const userSchema = mongoose.Schema({
     }
   ],
   numberOfBlogs: {
-    type: Number,
-    default: function () {
-      return this.blogs.length;
-    }
+    type: Number
   }
 });
 
@@ -34,6 +31,7 @@ userSchema.plugin(uniqueValidator);
 userSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
+    returnedObject.numberOfBlogs = returnedObject.blogs?.length;
     delete returnedObject._id;
     delete returnedObject.__v;
     delete returnedObject.passwordHash;

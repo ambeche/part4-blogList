@@ -54,7 +54,7 @@ blogsRouter.put('/:id', async (req, res) => {
   // the isLiked properter combined with the userId controlls whether a blog is liked or not
   // no multiple likes
 
-  const possibleLiker = likedblog.likes.users.find(
+  const likerExists = likedblog.likes.users.find(
     (user) => user.liker?.toString() === decodedToken.id.toString()
   );
 
@@ -62,21 +62,23 @@ blogsRouter.put('/:id', async (req, res) => {
 
   const setLiker = (isLiked) =>
     likedblog.likes.users.map((user) =>
-      user.liker?.toString() === decodedToken.id?.toString()
+      user.liker?.toString() === decodedToken.id.toString()
         ? { liker: decodedToken.id, isLiked }
         : user
     );
 
+  const likers = likerExists?.isLiked
+    ? setLiker(false)
+    : isEmpty || !likerExists
+      ? [...likedblog.likes.users, { liker: decodedToken.id, isLiked: true }]
+      : setLiker(true);
+
   likedblog.likes = {
     value:
-      possibleLiker && possibleLiker?.isLiked
+      likerExists && likerExists?.isLiked
         ? likedblog.likes.value - 1
         : req.body.likes.value,
-    users: possibleLiker?.isLiked
-      ? setLiker(false)
-      : isEmpty
-        ? [{ liker: decodedToken.id, isLiked: true }]
-        : setLiker(true)
+    users: likers
   };
   await likedblog.save();
 
