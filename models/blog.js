@@ -37,7 +37,13 @@ const blogSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Comment'
     }
-  ]
+  ],
+  linkPreview: {
+    title: String,
+    description: String,
+    image: String,
+    url: String
+  }
 });
 
 blogSchema.set('toJSON', {
