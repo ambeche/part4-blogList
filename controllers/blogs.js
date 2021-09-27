@@ -26,8 +26,6 @@ blogsRouter.post('/', async (req, res) => {
   const decodedToken = await decodeAndVerifyToken(req, res);
   const user = await User.findById(decodedToken.id);
 
-  //if (blog.likes.value === undefined) blog.likes.value = 0;
-
   blog.user = user._id;
   const newblog = new Blog(blog);
 
@@ -53,7 +51,6 @@ blogsRouter.put('/:id', async (req, res) => {
   // verifies whether a blog has already been liked, hance like/unlike a blog
   // the isLiked properter combined with the userId controlls whether a blog is liked or not
   // no multiple likes
-
   const likerExists = likedblog.likes.users.find(
     (user) => user.liker?.toString() === decodedToken.id.toString()
   );
@@ -83,6 +80,26 @@ blogsRouter.put('/:id', async (req, res) => {
   await likedblog.save();
 
   // responds with accociated fields populated
+  const updated = await Blog.findById(req.params.id)
+    .populate('user', { username: 1, name: 1 })
+    .populate('comments', { commentedBlog: 0 });
+  res.json(updated.toJSON());
+});
+
+blogsRouter.put('/:id/bookmark', async (req, res) => {
+  const decodedToken = await decodeAndVerifyToken(req, res);
+  const bookmarkedBlog = await Blog.findById(req.params.id);
+
+  // checks if a blog has been bookmarked for later reading and
+  // adds or removed block from the read list
+  bookmarkedBlog.reads = bookmarkedBlog.reads.length
+    ? bookmarkedBlog.reads.filter(
+      (reader) => reader?.toString() !== decodedToken.id.toString()
+    )
+    : [...bookmarkedBlog.reads, decodedToken.id];
+
+  await bookmarkedBlog.save();
+
   const updated = await Blog.findById(req.params.id)
     .populate('user', { username: 1, name: 1 })
     .populate('comments', { commentedBlog: 0 });

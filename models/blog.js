@@ -28,6 +28,7 @@ const blogSchema = mongoose.Schema({
     value: { type: Number, default: 0 },
     users: [likesSubSchema]
   },
+  reads: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -38,17 +39,22 @@ const blogSchema = mongoose.Schema({
       ref: 'Comment'
     }
   ],
+  numberOfComments: Number,
   linkPreview: {
     title: String,
     description: String,
     image: String,
     url: String
-  }
+  },
+  topics: [{
+    type: String
+  }]
 });
 
 blogSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
+    returnedObject.numberOfComments = returnedObject?.comments?.length;
     delete returnedObject._id;
     delete returnedObject.__v;
   }
