@@ -92,11 +92,13 @@ blogsRouter.put('/:id/bookmark', async (req, res) => {
 
   // checks if a blog has been bookmarked for later reading and
   // adds or removed block from the read list
-  bookmarkedBlog.reads = bookmarkedBlog.reads.length
-    ? bookmarkedBlog.reads.filter(
-      (reader) => reader?.toString() !== decodedToken.id.toString()
-    )
-    : [...bookmarkedBlog.reads, decodedToken.id];
+  bookmarkedBlog.reads =
+    !bookmarkedBlog.reads.length ||
+    !bookmarkedBlog.reads.includes(decodedToken.id.toString())
+      ? [...bookmarkedBlog.reads, decodedToken.id]
+      : bookmarkedBlog.reads.filter(
+        (reader) => reader?.toString() !== decodedToken.id.toString()
+      );
 
   await bookmarkedBlog.save();
 
