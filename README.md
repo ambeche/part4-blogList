@@ -4,10 +4,10 @@ A server app that powers BlogLister, a blogging application. It provides REST AP
 
 ## APIs
 ### Base URL 
-    baseUrl = https://bloglister-app.herokuapp.com/
+    baseUrl = https://bloglister-app.herokuapp.com/api
 ### GET
 #### [blogs](https://bloglister-app.herokuapp.com/api/blogs/)
-    url: [$baseUrl]api/blogs/
+    url: [$baseUrl]/blogs/
     Method: GET
 
 ### POST
@@ -15,7 +15,7 @@ A server app that powers BlogLister, a blogging application. It provides REST AP
 
     // with Postman
     
-    url:   [$baseUrl]api/users/       // https://bloglister-app.herokuapp.com/api/users/
+    url:   [$baseUrl]/users/       // https://bloglister-app.herokuapp.com/api/users/
     Method: POST
     Body:   {"username":"your username here", "name":"your name here", "password":"your password here" }
     
@@ -33,7 +33,7 @@ A server app that powers BlogLister, a blogging application. It provides REST AP
 
     ## with Postman
     
-    url:   [$baseUrl]api/login/       // https://bloglister-app.herokuapp.com/api/login/
+    url:   [$baseUrl]/login/       // https://bloglister-app.herokuapp.com/api/login/
     Method: POST
     Body:   {"username":"your username here", "password":"your password here" }
     
@@ -49,7 +49,7 @@ A server app that powers BlogLister, a blogging application. It provides REST AP
 
 #### Post an Blog/Article - [Postman](https://www.postman.com/downloads/)
 
-    url:   [$baseUrl]api/blogs/       // https://bloglister-app.herokuapp.com/api/blogs/
+    url:   [$baseUrl]/blogs/       // https://bloglister-app.herokuapp.com/api/blogs/
     Method: POST
     Headers: {
            Authorization: {
@@ -73,7 +73,7 @@ A server app that powers BlogLister, a blogging application. It provides REST AP
  
  #### Post a Comment - [Postman](https://www.postman.com/downloads/)
 
-    url:   [$baseUrl]api/blogs/:id/comments/       // https://bloglister-app.herokuapp.com/api/blogs/[id of the blog being commented]/comments/
+    url:   [$baseUrl]/blogs/:id/comments/       // https://bloglister-app.herokuapp.com/api/blogs/[id of the blog being commented]/comments/
                                                    //  You can use this:  https://bloglister-app.herokuapp.com/api/blogs/6103e79ce86a480584059197/comments
                                                    
     Method: POST
@@ -118,7 +118,7 @@ A server app that powers BlogLister, a blogging application. It provides REST AP
 ### PUT
 #### Like a Blog
 
-     url:   [$baseUrl]api/blogs/:id/         //  You can use this:  https://bloglister-app.herokuapp.com/api/blogs/6103e79ce86a480584059197/ 
+     url:   [$baseUrl]/blogs/:id/         //  You can use this:  https://bloglister-app.herokuapp.com/api/blogs/6103e79ce86a480584059197/ 
                                                 
                                                    
     Method: PUT
@@ -150,7 +150,7 @@ A server app that powers BlogLister, a blogging application. It provides REST AP
 
 #### A blog can only be deleted by an authenticated user who added the blog
      
-     url:       [$baseUrl]api/blogs/id
+     url:       [$baseUrl]/blogs/id
      Method:    DELETE
      Authorization: bearer Token
      
